@@ -1,7 +1,7 @@
 """Virtual ECU Implementation"""
 
-from uds_protocol import UDSProtocol
-from docan_bus import DoCAN
+from .uds_protocol import UDSProtocol
+from .docan_bus import DoCAN
 
 class VirtualECU:
     """Virtual ECU with UDS and DoCAN support"""
@@ -70,6 +70,8 @@ class VirtualECU:
         did = int.from_bytes(payload[:2], "big")
         response_data = self.data_identifiers.get(did, b"\x00")
         
+        # Limit response to fit in single frame (max 7 bytes total minus service ID)
+        response_data = response_data[:4]  # Limit to 4 bytes
         return bytes([0x62]) + payload[:2] + response_data
     
     def _handle_read_dtc(self, payload: bytes) -> bytes:
